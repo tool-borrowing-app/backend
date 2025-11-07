@@ -13,22 +13,15 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "tool")
-public class Tool extends BaseEntity {
+@Table(name = "lookup")
+public class Lookup extends BaseEntity {
+    @Column(name = "code", nullable = false)
+    private String code;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false)
-    private String description;
-
-    @Column(name = "rental_price", nullable = false)
-    private Long rentalPrice;
-
-    @Column(name = "deposit_price", nullable = false)
-    private Long depositPrice;
-
-    @JoinColumn(name = "lookup_id_status", referencedColumnName = "id")
+    @JoinColumn(name = "lookup_type_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private Lookup status;
+    private LookupType lookupType;
 }
