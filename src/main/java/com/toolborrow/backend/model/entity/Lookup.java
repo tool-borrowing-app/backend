@@ -8,13 +8,17 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "lookup")
+@Table(
+    name = "lookup",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"lookup_type_id", "code"})
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Lookup extends BaseEntity {
     @Column(name = "code", nullable = false)
