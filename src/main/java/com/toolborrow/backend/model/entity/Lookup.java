@@ -1,5 +1,6 @@
 package com.toolborrow.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.toolborrow.backend.model.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "lookup")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Lookup extends BaseEntity {
     @Column(name = "code", nullable = false)
     private String code;

@@ -14,7 +14,7 @@ public interface ToolService {
 
     @NonNull Tool create(final @NonNull Tool tool);
 
-    @NonNull Tool update(final @NonNull Long id, final @NonNull Tool tool);
+    @NonNull Tool update(final @NonNull Long id, final @NonNull Tool tool, final @NonNull String statusCode);
 
     void delete(final @NonNull Long id);
 

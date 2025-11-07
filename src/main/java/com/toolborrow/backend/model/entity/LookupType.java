@@ -1,5 +1,7 @@
 package com.toolborrow.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.toolborrow.backend.model.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "lookup_type")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class LookupType extends BaseEntity {
 
     @Column(name = "code", nullable = false, unique = true)
@@ -24,5 +27,6 @@ public class LookupType extends BaseEntity {
     private String name;
 
     @OneToMany(mappedBy = "lookupType", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Lookup> lookups;
 }

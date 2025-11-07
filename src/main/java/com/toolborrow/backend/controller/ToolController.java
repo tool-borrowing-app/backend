@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -51,9 +52,10 @@ public class ToolController {
     @PutMapping("/{id}")
     public @NonNull ResponseEntity<Tool> update(
         @PathVariable("id") final @NonNull Long id,
-        @RequestBody final @NonNull Tool tool
+        @RequestBody final @NonNull Tool tool,
+        @RequestParam("status") final @NonNull String statusCode
     ) {
-        final @NonNull Tool updated = service.update(id, tool);
+        final @NonNull Tool updated = service.update(id, tool, statusCode);
         return ResponseEntity.ok(updated);
     }
 
