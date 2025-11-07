@@ -1,5 +1,6 @@
 package com.toolborrow.backend.service;
 
+import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.entity.Tool;
 import lombok.NonNull;
 
@@ -8,13 +9,13 @@ import java.util.Optional;
 
 public interface ToolService {
 
-    @NonNull List<Tool> list();
+    @NonNull List<ToolDto> list();
 
-    @NonNull Optional<Tool> get(final @NonNull Long id);
+    @NonNull Optional<ToolDto> get(final @NonNull Long id);
 
-    @NonNull Tool create(final @NonNull Tool tool);
+    @NonNull ToolDto create(final @NonNull ToolDto tool);
 
-    @NonNull Tool update(final @NonNull Long id, final @NonNull Tool tool, final @NonNull String statusCode);
+    @NonNull ToolDto update(final @NonNull Long id, final @NonNull ToolDto tool, final @NonNull String statusCode);
 
     void delete(final @NonNull Long id);
 

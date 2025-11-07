@@ -1,11 +1,12 @@
-package com.toolborrow.backend.service.impl;
+package com.toolborrow.backend.service;
 
+import com.toolborrow.backend.mapping.ToolMapper;
+import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.entity.Lookup;
 import com.toolborrow.backend.model.entity.Tool;
 import com.toolborrow.backend.model.enums.LookupTypeCode;
 import com.toolborrow.backend.repository.LookupRepository;
 import com.toolborrow.backend.repository.ToolRepository;
-import com.toolborrow.backend.service.ToolService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,29 +23,39 @@ public class ToolServiceImpl implements ToolService {
 
     private final @NonNull ToolRepository toolRepository;
     private final @NonNull LookupRepository lookupRepository;
+    private final @NonNull ToolMapper toolMapper;
 
     @Override
-    public @NonNull List<Tool> list() {
+    public @NonNull List<ToolDto> list() {
         final @NonNull List<Tool> all = toolRepository.findAll();
-        return all;
+        return all
+            .stream()
+            .map(toolMapper::convert)
+            .toList();
     }
 
     @Override
-    public @NonNull Optional<Tool> get(final @NonNull Long id) {
-        return toolRepository.findById(id);
+    public @NonNull Optional<ToolDto> get(final @NonNull Long id) {
+        return toolRepository
+            .findById(id)
+            .map(toolMapper::convert);
     }
 
     @Override
-    public @NonNull Tool create(final @NonNull Tool tool) {
+    public @NonNull ToolDto create(final @NonNull ToolDto tool) {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
-        tool.setStatus(status);
-        return toolRepository.save(tool);
+
+        final @NonNull Tool entity = toolMapper.convert(tool);
+        entity.setStatus(status);
+
+        final @NonNull Tool saved = toolRepository.save(entity);
+        return toolMapper.convert(saved);
     }
 
     @Override
-    public @NonNull Tool update(
+    public @NonNull ToolDto update(
         final @NonNull Long id,
-        final @NonNull Tool tool,
+        final @NonNull ToolDto tool,
         final @NonNull String statusCode
     ) {
         final @NonNull Tool current = toolRepository.findById(id)
@@ -58,7 +69,8 @@ public class ToolServiceImpl implements ToolService {
         final @NonNull Lookup status = resolveToolStatus(statusCode);
         current.setStatus(status);
 
-        return toolRepository.save(current);
+        final @NonNull Tool saved = toolRepository.save(current);
+        return toolMapper.convert(saved);
     }
 
     @Override
