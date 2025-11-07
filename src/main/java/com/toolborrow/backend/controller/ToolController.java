@@ -52,10 +52,9 @@ public class ToolController {
     @PutMapping("/{id}")
     public @NonNull ResponseEntity<ToolDto> update(
         @PathVariable("id") final @NonNull Long id,
-        @RequestBody final @NonNull ToolDto tool,
-        @RequestParam("status") final @NonNull String statusCode
+        @RequestBody final @NonNull ToolDto tool
     ) {
-        final @NonNull ToolDto updated = service.update(id, tool, statusCode);
+        final @NonNull ToolDto updated = service.update(id, tool);
         return ResponseEntity.ok(updated);
     }
 

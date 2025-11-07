@@ -45,7 +45,7 @@ public class ToolServiceImpl implements ToolService {
     public @NonNull ToolDto create(final @NonNull ToolDto tool) {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
 
-        final @NonNull Tool entity = toolMapper.convert(tool);
+        final @NonNull Tool entity = toolMapper.convert(tool, status);
         entity.setStatus(status);
 
         final @NonNull Tool saved = toolRepository.save(entity);
@@ -55,8 +55,7 @@ public class ToolServiceImpl implements ToolService {
     @Override
     public @NonNull ToolDto update(
         final @NonNull Long id,
-        final @NonNull ToolDto tool,
-        final @NonNull String statusCode
+        final @NonNull ToolDto tool
     ) {
         final @NonNull Tool current = toolRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Tool not found: " + id));
@@ -66,6 +65,7 @@ public class ToolServiceImpl implements ToolService {
         current.setRentalPrice(tool.getRentalPrice());
         current.setDepositPrice(tool.getDepositPrice());
 
+        final @NonNull String statusCode = tool.getLookupStatus().getCode();
         final @NonNull Lookup status = resolveToolStatus(statusCode);
         current.setStatus(status);
 
