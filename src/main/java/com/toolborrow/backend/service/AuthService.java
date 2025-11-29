@@ -1,6 +1,7 @@
 package com.toolborrow.backend.service;
 
 import com.toolborrow.backend.model.dto.UserLoginDto;
+import com.toolborrow.backend.model.dto.UserProfileDto;
 import com.toolborrow.backend.model.dto.UserRegisterDto;
 import lombok.NonNull;
 
@@ -9,4 +10,6 @@ public interface AuthService {
     boolean register(@NonNull UserRegisterDto dto);
 
     String login(@NonNull UserLoginDto dto);
+
+    UserProfileDto getProfileFromToken(String token);
 }

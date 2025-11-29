@@ -1,5 +1,6 @@
 package com.toolborrow.backend.utils;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -29,5 +30,19 @@ public class JwtUtils {
                 .expiration(expiry)
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public String validateAndExtractEmail(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            return claims.getSubject();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid or expired token");
+        }
     }
 }

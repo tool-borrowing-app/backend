@@ -1,6 +1,7 @@
 package com.toolborrow.backend.service;
 
 import com.toolborrow.backend.model.dto.UserLoginDto;
+import com.toolborrow.backend.model.dto.UserProfileDto;
 import com.toolborrow.backend.model.dto.UserRegisterDto;
 import com.toolborrow.backend.model.entity.User;
 import com.toolborrow.backend.repository.UserRepository;
@@ -55,5 +56,17 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return jwtUtils.generateToken(user.getEmail());
+    }
+
+    public UserProfileDto getProfileFromToken(String token) {
+        String email = jwtUtils.validateAndExtractEmail(token);  // implement this
+        var user = userRepository.findByEmail(email);
+
+        return new UserProfileDto(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
+        );
     }
 }
