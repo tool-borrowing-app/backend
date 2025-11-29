@@ -21,7 +21,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean register(@NonNull UserRegisterDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new IllegalArgumentException("Ezt az email cím már egy másik fiók használja!");
         }
 
         User user = new User();
