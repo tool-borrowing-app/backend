@@ -1,9 +1,13 @@
 package com.toolborrow.backend.controller;
 
+import com.toolborrow.backend.model.dto.UserLoginDto;
 import com.toolborrow.backend.model.dto.UserRegisterDto;
 import com.toolborrow.backend.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +32,25 @@ public class AuthController {
             return ResponseEntity.status(201).body(Map.of("message", "Register successful"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
+        try {
+            String token = authService.login(dto);
+
+            Cookie cookie = new Cookie("access_token", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(3600);
+
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(Map.of("message", "Login successful"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 }
