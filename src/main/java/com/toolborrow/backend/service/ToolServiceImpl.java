@@ -1,6 +1,7 @@
 package com.toolborrow.backend.service;
 
 import com.toolborrow.backend.mapping.ToolMapper;
+import com.toolborrow.backend.model.dto.CreateToolDto;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.entity.Lookup;
 import com.toolborrow.backend.model.entity.Tool;
@@ -24,6 +25,7 @@ public class ToolServiceImpl implements ToolService {
     private final @NonNull ToolRepository toolRepository;
     private final @NonNull LookupRepository lookupRepository;
     private final @NonNull ToolMapper toolMapper;
+    private final @NonNull ImageStorageService imageStorageService;
 
     @Override
     public @NonNull List<ToolDto> list() {
@@ -42,13 +44,23 @@ public class ToolServiceImpl implements ToolService {
     }
 
     @Override
-    public @NonNull ToolDto create(final @NonNull ToolDto tool) {
+    public @NonNull ToolDto create(final @NonNull CreateToolDto tool) {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
 
-        final @NonNull Tool entity = toolMapper.convert(tool, status);
-        entity.setStatus(status);
+        final @NonNull Tool newToolEntity = toolMapper.convert(tool, status);
+        newToolEntity.setStatus(status);
 
-        final @NonNull Tool saved = toolRepository.save(entity);
+        final List<String> imageUrls = imageStorageService.uploadBase64Images(
+                tool.getImages(),
+                "tools"    // the name of the folder in the bucket
+        );
+
+        if (!imageUrls.isEmpty()) {
+            newToolEntity.setImageUrls(imageUrls);
+        }
+
+
+        final @NonNull Tool saved = toolRepository.save(newToolEntity);
         return toolMapper.convert(saved);
     }
 

@@ -1,5 +1,6 @@
 package com.toolborrow.backend.mapping;
 
+import com.toolborrow.backend.model.dto.CreateToolDto;
 import com.toolborrow.backend.model.dto.LookupDto;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.entity.Lookup;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class ToolMapper {
 
     public @NonNull Tool convert(
-        final @NonNull ToolDto toolDto,
+        final @NonNull CreateToolDto toolDto,
         final @NonNull Lookup status
     ) {
         final @NonNull Tool result = new Tool();

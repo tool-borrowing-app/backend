@@ -1,5 +1,6 @@
 package com.toolborrow.backend.controller;
 
+import com.toolborrow.backend.model.dto.CreateToolDto;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.service.ToolService;
 import lombok.NonNull;
@@ -42,9 +43,9 @@ public class ToolController {
 
     @PostMapping
     public @NonNull ResponseEntity<ToolDto> create(
-        @RequestBody final @NonNull ToolDto tool
+        @RequestBody final @NonNull CreateToolDto createToolDto
     ) {
-        final @NonNull ToolDto saved = service.create(tool);
+        final @NonNull ToolDto saved = service.create(createToolDto);
         return ResponseEntity.ok(saved);
     }
 
