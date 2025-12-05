@@ -7,24 +7,27 @@ import com.google.cloud.storage.StorageOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
 
+    @Value("${firebase.service-account-json}")
+    private String serviceAccountJson;
 
     @Bean
     public Storage firebaseStorage() throws IOException {
-        GoogleCredentials credentials = GoogleCredentials.fromStream(
-                new ClassPathResource("firebase-service-account.json").getInputStream()
-        );
-        return
-                StorageOptions.newBuilder()
-                        .setCredentials(credentials)
-                        .build()
-                        .getService();
+        InputStream serviceAccountStream = new ByteArrayInputStream(serviceAccountJson.getBytes());
+
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream);
+
+        return StorageOptions.newBuilder()
+                .setCredentials(credentials)
+                .build()
+                .getService();
     }
 
     @Bean
