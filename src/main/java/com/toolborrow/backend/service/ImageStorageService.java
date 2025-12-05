@@ -21,8 +21,6 @@ public class ImageStorageService {
     private String publicUrlPrefix;
 
     public List<String> uploadBase64Images(List<String> base64Images, String folder) {
-        System.out.println("Called uploadBase64Images using publicUrlPrefix: " + publicUrlPrefix);
-
         List<String> urls = new ArrayList<>();
 
         if (base64Images == null) {
