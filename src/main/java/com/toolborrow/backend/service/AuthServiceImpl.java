@@ -18,9 +18,6 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtUtils jwtUtils;
-
     private final @NonNull UserRepository userRepository;
 
     @NonNull
@@ -55,11 +52,11 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Invalid credentials");
         }
 
-        return jwtUtils.generateToken(user.getEmail());
+        return JwtUtils.generateToken(user.getEmail());
     }
 
     public UserProfileDto getProfileFromToken(String token) {
-        String email = jwtUtils.validateAndExtractEmail(token);  // implement this
+        String email = JwtUtils.validateAndExtractEmail(token);  // implement this
         var user = userRepository.findByEmail(email);
 
         return new UserProfileDto(
