@@ -16,7 +16,9 @@ import com.toolborrow.backend.utils.JwtUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -50,18 +52,33 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationMapper.from(entity);
     }
 
+    @Transactional
     public @NonNull ReservationDto createReservation(final @NonNull ReservationDto reservation) {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
         final @NonNull User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
+
         final @NonNull Tool tool = toolRepository.findById(reservation.getToolDto().getId())
             .orElseThrow(() -> new TBAException(
                 NOT_FOUND, "Tool not found with id " + reservation.getToolDto().getId()));
 
+        final @NonNull LocalDate from = reservation.getDateFrom();
+        final @NonNull LocalDate to = reservation.getDateTo();
+
+        if (from.isAfter(to)) {
+            throw new TBAException(BAD_REQUEST, "Invalid date range: dateFrom must be before or equal to dateTo");
+        }
+
+        final boolean overlapExists =
+            reservationRepository.existsOverlappingActiveReservation(tool.getId(), from, to);
+
+        if (overlapExists) {
+            throw new TBAException(BAD_REQUEST, "Tool already reserved in the requested date range");
+        }
+
         final @NonNull Reservation entity = reservationMapper.from(reservation, user, tool, status);
+        final @NonNull Reservation saved = reservationRepository.save(entity);
 
-        // TODO: ide kellene egy ellenőrzés. ne lehessen egy időpillanatban egy tool többször lefoglalva (akár több user által)
-
-        return reservationMapper.from(reservationRepository.save(entity));
+        return reservationMapper.from(saved);
     }
 
     // ===============================================================================

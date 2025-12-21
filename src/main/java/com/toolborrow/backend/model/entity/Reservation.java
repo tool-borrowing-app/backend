@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -17,11 +17,11 @@ public class Reservation extends BaseEntity {
     @JoinColumn(name = "tool_id", nullable = false)
     private Tool tool;
 
-    @Column(name = "date_time_from", nullable = false)
-    private LocalDateTime dateTimeFrom;
+    @Column(name = "date_from", nullable = false)
+    private LocalDate dateFrom;
 
-    @Column(name = "date_time_to", nullable = false)
-    private LocalDateTime dateTimeTo;
+    @Column(name = "date_to", nullable = false)
+    private LocalDate dateTo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "lookup_id_status", nullable = false)

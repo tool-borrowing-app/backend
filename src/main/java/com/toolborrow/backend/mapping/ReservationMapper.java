@@ -24,8 +24,8 @@ public class ReservationMapper {
     ) {
         final @NonNull Reservation entity = new Reservation();
 
-        entity.setDateTimeFrom(dto.getDateTimeFrom());
-        entity.setDateTimeTo(dto.getDateTimeTo());
+        entity.setDateFrom(dto.getDateFrom());
+        entity.setDateTo(dto.getDateTo());
         entity.setTool(tool);
         entity.setUserIdBorrow(user);
         entity.setStatus(status);
@@ -37,8 +37,8 @@ public class ReservationMapper {
         final @NonNull ReservationDto dto = new ReservationDto();
 
         dto.setId(entity.getId());
-        dto.setDateTimeFrom(entity.getDateTimeFrom());
-        dto.setDateTimeTo(entity.getDateTimeTo());
+        dto.setDateFrom(entity.getDateFrom());
+        dto.setDateTo(entity.getDateTo());
         dto.setToolDto(toolMapper.convert(entity.getTool()));
 
         if (entity.getStatus() != null) {
