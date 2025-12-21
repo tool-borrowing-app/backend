@@ -1,5 +1,6 @@
 package com.toolborrow.backend.service;
 
+import com.toolborrow.backend.exception.TBAException;
 import com.toolborrow.backend.mapping.ToolMapper;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.entity.Lookup;
@@ -58,7 +59,7 @@ public class ToolServiceImpl implements ToolService {
         final @NonNull ToolDto tool
     ) {
         final @NonNull Tool current = toolRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Tool not found: " + id));
+            .orElseThrow(() -> new TBAException(NOT_FOUND, "Tool not found: " + id));
 
         current.setName(tool.getName());
         current.setDescription(tool.getDescription());
@@ -76,7 +77,7 @@ public class ToolServiceImpl implements ToolService {
     @Override
     public void delete(final @NonNull Long id) {
         if (!toolRepository.existsById(id)) {
-            throw new ResponseStatusException(NOT_FOUND, "Tool not found: " + id);
+            throw new TBAException(NOT_FOUND, "Tool not found: " + id);
         }
         toolRepository.deleteById(id);
     }
@@ -88,7 +89,7 @@ public class ToolServiceImpl implements ToolService {
 
         return lookupRepository
             .findByCodeAndLookupTypeCode(statusCode, lookupTypeCode)
-            .orElseThrow(() -> new ResponseStatusException(
+            .orElseThrow(() -> new TBAException(
                 NOT_FOUND,
                 "Tool status lookup not found: code=%s type=%s".formatted(statusCode, lookupTypeCode)
             ));

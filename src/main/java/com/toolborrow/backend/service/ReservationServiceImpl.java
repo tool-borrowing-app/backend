@@ -1,5 +1,6 @@
 package com.toolborrow.backend.service;
 
+import com.toolborrow.backend.exception.TBAException;
 import com.toolborrow.backend.mapping.ReservationMapper;
 import com.toolborrow.backend.model.dto.ReservationDto;
 import com.toolborrow.backend.model.entity.Lookup;
@@ -15,7 +16,6 @@ import com.toolborrow.backend.utils.JwtUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -33,7 +33,8 @@ public class ReservationServiceImpl implements ReservationService {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
         final String email = JwtUtils.getCurrentUserEmail();
         final User user = userRepository.findByEmail(email);
-        final Tool tool = toolRepository.findById(reservation.getToolDto().getId()).orElseThrow(RuntimeException::new);
+        final Tool tool = toolRepository.findById(reservation.getToolDto().getId()).orElseThrow(() -> new TBAException(
+            NOT_FOUND, "Tool not found with id " + reservation.getToolDto().getId()));
 
         final @NonNull Reservation entity = reservationMapper.from(reservation, user, tool, status);
         return reservationMapper.from(reservationRepository.save(entity));
@@ -46,7 +47,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         return lookupRepository
             .findByCodeAndLookupTypeCode(statusCode, lookupTypeCode)
-            .orElseThrow(() -> new ResponseStatusException(
+            .orElseThrow(() -> new TBAException(
                 NOT_FOUND,
                 "Reservation status lookup not found: code=%s type=%s".formatted(statusCode, lookupTypeCode)
             ));
