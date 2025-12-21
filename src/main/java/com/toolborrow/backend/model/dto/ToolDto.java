@@ -11,6 +11,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class ToolDto {
+    private Long id;
     private @NonNull String name;
     private @NonNull String description;
     private @NonNull Long rentalPrice;

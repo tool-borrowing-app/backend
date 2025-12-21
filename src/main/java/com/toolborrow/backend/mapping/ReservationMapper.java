@@ -1,0 +1,48 @@
+package com.toolborrow.backend.mapping;
+
+import com.toolborrow.backend.model.dto.LookupDto;
+import com.toolborrow.backend.model.dto.ReservationDto;
+import com.toolborrow.backend.model.entity.Lookup;
+import com.toolborrow.backend.model.entity.Reservation;
+import com.toolborrow.backend.model.entity.Tool;
+import com.toolborrow.backend.model.entity.User;
+import lombok.NonNull;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ReservationMapper {
+
+    public @NonNull Reservation from(
+        final @NonNull ReservationDto dto,
+        final @NonNull User user,
+        final @NonNull Tool tool,
+        final @NonNull Lookup status
+    ) {
+        final @NonNull Reservation entity = new Reservation();
+
+        entity.setDateTimeFrom(dto.getDateTimeFrom());
+        entity.setDateTimeTo(dto.getDateTimeTo());
+        entity.setTool(tool);
+        entity.setUserIdBorrow(user);
+        entity.setStatus(status);
+
+        return entity;
+    }
+
+    public @NonNull ReservationDto from(final @NonNull Reservation entity) {
+        final @NonNull ReservationDto dto = new ReservationDto();
+
+        dto.setId(entity.getId());
+        dto.setDateTimeFrom(entity.getDateTimeFrom());
+        dto.setDateTimeTo(entity.getDateTimeTo());
+
+        if (entity.getStatus() != null) {
+            dto.setStatus(new LookupDto(
+                entity.getStatus().getCode(),
+                entity.getStatus().getName()
+            ));
+        }
+
+        return dto;
+    }
+}
