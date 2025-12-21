@@ -31,6 +31,7 @@ public class ToolMapper {
     public @NonNull ToolDto convert(final @NonNull Tool tool) {
         final @NonNull ToolDto result = new ToolDto();
 
+        result.setId(tool.getId());
         result.setName(tool.getName());
         result.setDescription(tool.getDescription());
         result.setDepositPrice(tool.getDepositPrice());

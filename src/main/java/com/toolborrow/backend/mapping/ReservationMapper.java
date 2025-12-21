@@ -7,10 +7,14 @@ import com.toolborrow.backend.model.entity.Reservation;
 import com.toolborrow.backend.model.entity.Tool;
 import com.toolborrow.backend.model.entity.User;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ReservationMapper {
+
+    private final ToolMapper toolMapper;
 
     public @NonNull Reservation from(
         final @NonNull ReservationDto dto,
@@ -35,6 +39,7 @@ public class ReservationMapper {
         dto.setId(entity.getId());
         dto.setDateTimeFrom(entity.getDateTimeFrom());
         dto.setDateTimeTo(entity.getDateTimeTo());
+        dto.setToolDto(toolMapper.convert(entity.getTool()));
 
         if (entity.getStatus() != null) {
             dto.setStatus(new LookupDto(

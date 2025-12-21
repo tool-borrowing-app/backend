@@ -5,10 +5,14 @@ import com.toolborrow.backend.service.ReservationService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/reservation")
@@ -16,6 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReservationController {
 
     private final ReservationService reservationService;
+
+    @GetMapping
+    public ResponseEntity<List<ReservationDto>> getAllReservations() {
+        return ResponseEntity.ok(reservationService.getReservations());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservationDto> getReservationById(final @PathVariable @NonNull Long id){
+        return ResponseEntity.ok(reservationService.getById(id));
+    }
 
     @PostMapping
     public ResponseEntity<ReservationDto> createReservation(final @RequestBody @NonNull ReservationDto reservationDto) {
