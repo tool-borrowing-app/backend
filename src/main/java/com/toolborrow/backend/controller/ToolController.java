@@ -35,9 +35,7 @@ public class ToolController {
     public @NonNull ResponseEntity<ToolDto> get(
         @PathVariable("id") final @NonNull Long id
     ) {
-        return service.get(id)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.get(id));
     }
 
     @PostMapping

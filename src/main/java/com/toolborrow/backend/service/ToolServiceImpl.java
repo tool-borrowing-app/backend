@@ -5,9 +5,12 @@ import com.toolborrow.backend.mapping.ToolMapper;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.entity.Lookup;
 import com.toolborrow.backend.model.entity.Tool;
+import com.toolborrow.backend.model.entity.User;
 import com.toolborrow.backend.model.enums.LookupTypeCode;
 import com.toolborrow.backend.repository.LookupRepository;
 import com.toolborrow.backend.repository.ToolRepository;
+import com.toolborrow.backend.repository.UserRepository;
+import com.toolborrow.backend.utils.JwtUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class ToolServiceImpl implements ToolService {
     private final @NonNull ToolRepository toolRepository;
     private final @NonNull LookupRepository lookupRepository;
     private final @NonNull ToolMapper toolMapper;
+    private final UserRepository userRepository;
 
     @Override
     public @NonNull List<ToolDto> list() {
@@ -36,17 +40,19 @@ public class ToolServiceImpl implements ToolService {
     }
 
     @Override
-    public @NonNull Optional<ToolDto> get(final @NonNull Long id) {
+    public @NonNull ToolDto get(final @NonNull Long id) {
         return toolRepository
             .findById(id)
-            .map(toolMapper::convert);
+            .map(toolMapper::convert)
+            .orElseThrow(() -> new TBAException(NOT_FOUND, "Tool not found with id: " + id));
     }
 
     @Override
     public @NonNull ToolDto create(final @NonNull ToolDto tool) {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
+        final User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
 
-        final @NonNull Tool entity = toolMapper.convert(tool, status);
+        final @NonNull Tool entity = toolMapper.convert(tool, status, user);
         entity.setStatus(status);
 
         final @NonNull Tool saved = toolRepository.save(entity);
@@ -60,6 +66,11 @@ public class ToolServiceImpl implements ToolService {
     ) {
         final @NonNull Tool current = toolRepository.findById(id)
             .orElseThrow(() -> new TBAException(NOT_FOUND, "Tool not found: " + id));
+        final User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
+
+        if(user == null || !current.getUser().getId().equals(user.getId())) {
+            throw new TBAException(NOT_FOUND, "Updating tool is not allowed for current user!");
+        }
 
         current.setName(tool.getName());
         current.setDescription(tool.getDescription());

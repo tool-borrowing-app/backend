@@ -10,7 +10,7 @@ public interface ToolService {
 
     @NonNull List<ToolDto> list();
 
-    @NonNull Optional<ToolDto> get(final @NonNull Long id);
+    @NonNull ToolDto get(final @NonNull Long id);
 
     @NonNull ToolDto create(final @NonNull ToolDto tool);
 

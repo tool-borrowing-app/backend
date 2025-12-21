@@ -31,4 +31,8 @@ public class Tool extends BaseEntity {
     @JoinColumn(name = "lookup_id_status", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Lookup status;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
