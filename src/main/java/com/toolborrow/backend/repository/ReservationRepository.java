@@ -37,4 +37,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long >
           and r.dateTo < :date
     """)
     List<Reservation> findReservationsToClose(@Param("date") LocalDate date);
+
+    List<Reservation> findByToolId(Long toolId);
 }

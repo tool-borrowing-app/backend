@@ -1,5 +1,6 @@
 package com.toolborrow.backend.controller;
 
+import com.toolborrow.backend.model.dto.ReservationDto;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.service.ToolService;
 import lombok.NonNull;
@@ -61,5 +62,10 @@ public class ToolController {
     ) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/reservation")
+    public @NonNull ResponseEntity<List<ReservationDto>> getToolReservations(final @PathVariable @NonNull Long id) {
+        return ResponseEntity.ok(service.getToolReservations(id));
     }
 }

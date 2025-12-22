@@ -1,5 +1,6 @@
 package com.toolborrow.backend.service;
 
+import com.toolborrow.backend.model.dto.ReservationDto;
 import com.toolborrow.backend.model.dto.ToolDto;
 import lombok.NonNull;
 
@@ -17,5 +18,7 @@ public interface ToolService {
     @NonNull ToolDto update(final @NonNull Long id, final @NonNull ToolDto tool);
 
     void delete(final @NonNull Long id);
+
+    @NonNull List<ReservationDto> getToolReservations(final @NonNull Long id);
 
 }
