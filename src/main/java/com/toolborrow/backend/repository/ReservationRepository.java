@@ -49,5 +49,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long >
     """)
     boolean existsActiveReservationForToolId(@Param("toolId") Long toolId);
 
+    @Query("""
+        select count(r)
+        from Reservation r
+        join r.status s
+        join s.lookupType lt
+        where r.tool.id = :toolId
+          and r.userIdBorrow.id = :userId
+          and lt.code = 'RESERVATION_STATUS'
+          and s.code = 'ACTIVE'
+    """)
+    long countActiveReservationsByUserAndTool(@Param("userId") Long userId, @Param("toolId") Long toolId);
+
     List<Reservation> findByToolId(Long toolId);
 }

@@ -16,6 +16,7 @@ import com.toolborrow.backend.utils.JwtUtils;
 import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,9 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationMapper reservationMapper;
     private final UserRepository userRepository;
     private final LookupRepository lookupRepository;
+
+    @Value("${reservation.max-per-user-per-tool}")
+    private int maxReservationsPerUserPerTool;
 
     @Override
     public @NonNull List<ReservationDto> getReservations() {
@@ -64,6 +68,14 @@ public class ReservationServiceImpl implements ReservationService {
 
         if(user.equals(tool.getUser())) {
             throw new TBAException(BAD_REQUEST, "User cannot reserve their own tool");
+        }
+
+        // ---- limit ellenőrzés ----
+        final long existingReservations = reservationRepository.countActiveReservationsByUserAndTool(user.getId(), tool.getId());
+        if (existingReservations >= maxReservationsPerUserPerTool) {
+            throw new TBAException(BAD_REQUEST,
+                "User cannot have more than " + maxReservationsPerUserPerTool +
+                    " active reservations for this tool!");
         }
 
         final @NonNull LocalDate from = reservation.getDateFrom();
