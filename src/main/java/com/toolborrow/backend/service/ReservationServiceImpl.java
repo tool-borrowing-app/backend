@@ -62,8 +62,17 @@ public class ReservationServiceImpl implements ReservationService {
             .orElseThrow(() -> new TBAException(
                 NOT_FOUND, "Tool not found with id " + reservation.getToolDto().getId()));
 
+        if(user.equals(tool.getUser())) {
+            throw new TBAException(BAD_REQUEST, "User cannot reserve their own tool");
+        }
+
         final @NonNull LocalDate from = reservation.getDateFrom();
         final @NonNull LocalDate to = reservation.getDateTo();
+        final @NonNull LocalDate today = LocalDate.now();
+
+        if (from.isBefore(today)) {
+            throw new TBAException(BAD_REQUEST, "Reservation date cannot be in the past");
+        }
 
         if (from.isAfter(to)) {
             throw new TBAException(BAD_REQUEST, "Invalid date range: dateFrom must be before or equal to dateTo");
