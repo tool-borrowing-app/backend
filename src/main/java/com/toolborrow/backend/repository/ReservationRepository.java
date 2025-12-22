@@ -26,4 +26,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long >
         @Param("from") LocalDate from,
         @Param("to") LocalDate to
     );
+
+    @Query("""
+        select r
+        from Reservation r
+        join fetch r.status s
+        join fetch s.lookupType lt
+        where lt.code = 'RESERVATION_STATUS'
+          and s.code = 'ACTIVE'
+          and r.dateTo < :date
+    """)
+    List<Reservation> findReservationsToClose(@Param("date") LocalDate date);
 }
