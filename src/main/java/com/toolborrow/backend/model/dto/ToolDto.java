@@ -17,4 +17,5 @@ public class ToolDto {
     private @NonNull Long rentalPrice;
     private @NonNull Long depositPrice;
     private @NonNull LookupDto lookupStatus;
+    private UserProfileDto user;
 }

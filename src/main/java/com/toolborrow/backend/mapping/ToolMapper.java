@@ -2,6 +2,7 @@ package com.toolborrow.backend.mapping;
 
 import com.toolborrow.backend.model.dto.LookupDto;
 import com.toolborrow.backend.model.dto.ToolDto;
+import com.toolborrow.backend.model.dto.UserProfileDto;
 import com.toolborrow.backend.model.entity.Lookup;
 import com.toolborrow.backend.model.entity.Tool;
 import com.toolborrow.backend.model.entity.User;
@@ -36,6 +37,15 @@ public class ToolMapper {
         result.setDescription(tool.getDescription());
         result.setDepositPrice(tool.getDepositPrice());
         result.setRentalPrice(tool.getRentalPrice());
+
+        final @NonNull User user = tool.getUser();
+
+        result.setUser(new UserProfileDto(
+            user.getId(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getEmail()
+        ));
 
         if (tool.getStatus() != null) {
             result.setLookupStatus(new LookupDto(
