@@ -16,8 +16,8 @@ public class ReservationDto {
     private LocalDate dateFrom;
     private LocalDate dateTo;
     private LookupDto status;
-    private Long rentalScore;
-    private String rentalComment;
+    private Long ownerScore;
+    private String ownerComment;
     private Long borrowerScore;
     private String borrowerComment;
 }

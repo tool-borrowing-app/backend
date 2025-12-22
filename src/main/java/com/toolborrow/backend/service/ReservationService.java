@@ -12,4 +12,6 @@ public interface ReservationService {
     ReservationDto getById(final @NonNull Long id);
 
     ReservationDto createReservation(final @NonNull ReservationDto reservation);
+
+    ReservationDto submitReview(final @NonNull Long id, final @NonNull ReservationDto reservation);
 }

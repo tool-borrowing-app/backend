@@ -48,6 +48,11 @@ public class ReservationMapper {
             ));
         }
 
+        dto.setBorrowerComment(entity.getBorrowerComment());
+        dto.setBorrowerScore(entity.getBorrowerScore());
+        dto.setOwnerComment(entity.getOwnerComment());
+        dto.setOwnerScore(entity.getOwnerScore());
+
         return dto;
     }
 }

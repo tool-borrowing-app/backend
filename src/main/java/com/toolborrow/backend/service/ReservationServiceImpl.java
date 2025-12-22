@@ -13,6 +13,7 @@ import com.toolborrow.backend.repository.ReservationRepository;
 import com.toolborrow.backend.repository.ToolRepository;
 import com.toolborrow.backend.repository.UserRepository;
 import com.toolborrow.backend.utils.JwtUtils;
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Transactional
     public @NonNull ReservationDto createReservation(final @NonNull ReservationDto reservation) {
-        final @NonNull Lookup status = resolveToolStatus("ACTIVE");
+        final @NonNull Lookup status = resolveReservationStatus("ACTIVE");
         final @NonNull User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
 
         final @NonNull Tool tool = toolRepository.findById(reservation.getToolDto().getId())
@@ -81,9 +82,63 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationMapper.from(saved);
     }
 
+    @Override
+    @Transactional
+    public @NonNull ReservationDto submitReview(final @NonNull Long id, final @NonNull ReservationDto dto) {
+
+        final @NonNull Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new TBAException(NOT_FOUND, "Reservation not found with id: " + id));
+
+        if (!reservation.getStatus().getCode().equals("FINISHED")) {
+            throw new TBAException(BAD_REQUEST, "Reservation has not finished yet!");
+        }
+
+        final @NonNull User currentUser = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
+
+        if (currentUser.equals(reservation.getUserIdBorrow())) {
+            // kölcsönző értékel
+            if (reservation.getOwnerScore() != null) {
+                throw new TBAException(BAD_REQUEST, "You have already submitted a review as borrower!");
+            }
+
+            final String ownerComment = dto.getOwnerComment();
+            final Long ownerScore = dto.getOwnerScore();
+            validateCommentAndScore(ownerComment, ownerScore);
+
+            reservation.setOwnerComment(ownerComment);
+            reservation.setOwnerScore(ownerScore);
+        } else if (currentUser.equals(reservation.getTool().getUser())) {
+            // bérbeadó értékel
+            if (reservation.getBorrowerScore() != null) {
+                throw new TBAException(BAD_REQUEST, "You have already submitted a review as owner!");
+            }
+
+            final String borrowerComment = dto.getBorrowerComment();
+            final Long borrowerScore = dto.getBorrowerScore();
+            validateCommentAndScore(borrowerComment, borrowerScore);
+
+            reservation.setBorrowerComment(borrowerComment);
+            reservation.setBorrowerScore(borrowerScore);
+        } else {
+            throw new TBAException(BAD_REQUEST, "User not allowed to submit review to reservation with id: " + id);
+        }
+
+        final @NonNull Reservation saved = reservationRepository.save(reservation);
+        return reservationMapper.from(saved);
+    }
+
     // ===============================================================================
 
-    private @NonNull Lookup resolveToolStatus(final @NonNull String statusCode) {
+    private void validateCommentAndScore(final @Nullable String comment, final @Nullable Long score) {
+        if (comment == null || comment.isBlank()) {
+            throw new TBAException(BAD_REQUEST, "Comment must not be empty!");
+        }
+        if (score == null || score < 1 || score > 5) {
+            throw new TBAException(BAD_REQUEST, "Score must be between 1 and 5!");
+        }
+    }
+
+    private @NonNull Lookup resolveReservationStatus(final @NonNull String statusCode) {
         final @NonNull String lookupTypeCode = LookupTypeCode.RESERVATION_STATUS.getCode();
 
         return lookupRepository

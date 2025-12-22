@@ -35,4 +35,11 @@ public class ReservationController {
     public ResponseEntity<ReservationDto> createReservation(final @RequestBody @NonNull ReservationDto reservationDto) {
         return ResponseEntity.ok(reservationService.createReservation(reservationDto));
     }
+
+    // =================================== REVIEW ===================================
+
+    @PostMapping("/{id}/review")
+    public ResponseEntity<ReservationDto> submitReview(final @PathVariable @NonNull Long id, final @RequestBody ReservationDto reservationDto) {
+        return ResponseEntity.ok(reservationService.submitReview(id, reservationDto));
+    }
 }
