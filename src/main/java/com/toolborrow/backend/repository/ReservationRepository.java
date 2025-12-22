@@ -38,5 +38,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long >
     """)
     List<Reservation> findReservationsToClose(@Param("date") LocalDate date);
 
+    @Query("""
+        select case when count(r) > 0 then true else false end
+        from Reservation r
+        join r.status s
+        join s.lookupType lt
+        where r.tool.id = :toolId
+          and lt.code = 'RESERVATION_STATUS'
+          and s.code = 'ACTIVE'
+    """)
+    boolean existsActiveReservationForToolId(@Param("toolId") Long toolId);
+
     List<Reservation> findByToolId(Long toolId);
 }

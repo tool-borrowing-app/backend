@@ -18,6 +18,7 @@ import com.toolborrow.backend.utils.JwtUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -55,6 +56,7 @@ public class ToolServiceImpl implements ToolService {
     }
 
     @Override
+    @Transactional
     public @NonNull ToolDto create(final @NonNull ToolDto tool) {
         final @NonNull Lookup status = resolveToolStatus("ACTIVE");
         final User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
@@ -67,6 +69,7 @@ public class ToolServiceImpl implements ToolService {
     }
 
     @Override
+    @Transactional
     public @NonNull ToolDto update(
         final @NonNull Long id,
         final @NonNull ToolDto tool
@@ -88,19 +91,27 @@ public class ToolServiceImpl implements ToolService {
         final @NonNull Lookup status = resolveToolStatus(statusCode);
         current.setStatus(status);
 
-        // TODO: ellenőrzés: nincs az eszközön aktív foglalás
+        final boolean hasActive = reservationRepository.existsActiveReservationForToolId(id);
+        if (hasActive) {
+            throw new TBAException(BAD_REQUEST, "Tool has active reservations and cannot be updated: " + id);
+        }
 
         final @NonNull Tool saved = toolRepository.save(current);
         return toolMapper.convert(saved);
     }
 
+    @Transactional
     @Override
     public void delete(final @NonNull Long id) {
         if (!toolRepository.existsById(id)) {
             throw new TBAException(NOT_FOUND, "Tool not found: " + id);
         }
 
-        // TODO: ellenőrzés: nincs az eszközön aktív foglalás
+        final boolean hasActive = reservationRepository.existsActiveReservationForToolId(id);
+        if (hasActive) {
+            throw new TBAException(BAD_REQUEST, "Tool has active reservations and cannot be deleted: " + id);
+        }
+
         toolRepository.deleteById(id);
     }
 
