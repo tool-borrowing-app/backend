@@ -143,8 +143,6 @@ public class ToolServiceImpl implements ToolService {
         return reservationRepository.findByToolId(id).stream().map(reservationMapper::from).toList();
     }
 
-    // ===============================================================================
-
     private @NonNull Lookup resolveToolStatus(final @NonNull String statusCode) {
         final @NonNull String lookupTypeCode = LookupTypeCode.TOOL_STATUS.getCode();
 

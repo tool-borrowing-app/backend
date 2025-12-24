@@ -43,6 +43,5 @@ public class Tool extends BaseEntity {
     private List<String> imageUrls = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

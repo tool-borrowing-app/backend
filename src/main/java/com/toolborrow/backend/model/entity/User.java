@@ -1,10 +1,10 @@
 package com.toolborrow.backend.model.entity;
 
 import com.toolborrow.backend.model.entity.base.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -34,4 +34,7 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String streetAddress;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Tool> tools;
 }
