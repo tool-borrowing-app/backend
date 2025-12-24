@@ -30,6 +30,10 @@ public class Tool extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Lookup status;
 
+    @JoinColumn(name = "lookup_id_category", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Lookup category;
+
     @ElementCollection
     @CollectionTable(
             name = "tool_images",

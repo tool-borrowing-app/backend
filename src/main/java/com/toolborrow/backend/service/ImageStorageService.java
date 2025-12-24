@@ -1,11 +1,12 @@
 package com.toolborrow.backend.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -17,8 +18,7 @@ public class ImageStorageService {
 
     private final Bucket bucket;
 
-    @Value("${firebase.public-url-prefix:https://storage.googleapis.com}")
-    private String publicUrlPrefix;
+    private static final String FIREBASE_STORAGE_URL = "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media";
 
     public List<String> uploadBase64Images(List<String> base64Images, String folder) {
         List<String> urls = new ArrayList<>();
@@ -39,17 +39,25 @@ public class ImageStorageService {
             byte[] bytes = Base64.getDecoder().decode(dataPart);
 
             String contentType = "image/jpeg";
+            String extension = ".jpg";
             if (meta.contains("image/png")) {
                 contentType = "image/png";
             } else if (meta.contains("image/webp")) {
                 contentType = "image/webp";
             }
 
-            String objectName = folder + "/" + UUID.randomUUID();
+            String objectName = folder + "/" + UUID.randomUUID() + extension;
             Blob blob = bucket.create(objectName, bytes, contentType);
 
-            String url = publicUrlPrefix + "/" + bucket.getName() + "/" + blob.getName();
-            urls.add(url);
+            String encodedObjectName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
+
+            String publicUrl = String.format(
+                    FIREBASE_STORAGE_URL,
+                    bucket.getName(),
+                    encodedObjectName
+            );
+
+            urls.add(publicUrl);
         }
 
         return urls;
