@@ -37,4 +37,8 @@ public class Tool extends BaseEntity {
     )
     @Column(name = "image_url", nullable = false)
     private List<String> imageUrls = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
