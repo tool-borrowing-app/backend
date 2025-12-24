@@ -1,5 +1,7 @@
 package com.toolborrow.backend.mapping;
+import java.util.ArrayList;
 
+import com.toolborrow.backend.model.dto.CreateToolDto;
 import com.toolborrow.backend.model.dto.LookupDto;
 import com.toolborrow.backend.model.dto.ToolDto;
 import com.toolborrow.backend.model.dto.UserProfileDto;
@@ -13,9 +15,10 @@ import org.springframework.stereotype.Service;
 public class ToolMapper {
 
     public @NonNull Tool convert(
-        final @NonNull ToolDto toolDto,
+        final @NonNull CreateToolDto toolDto,
         final @NonNull Lookup status,
-        final @NonNull User user
+        final @NonNull User user,
+        final @NonNull Lookup category
     ) {
         final @NonNull Tool result = new Tool();
 
@@ -24,6 +27,7 @@ public class ToolMapper {
         result.setDepositPrice(toolDto.getDepositPrice());
         result.setRentalPrice(toolDto.getRentalPrice());
         result.setStatus(status);
+        result.setCategory(category);
         result.setUser(user);
 
         return result;
@@ -37,6 +41,7 @@ public class ToolMapper {
         result.setDescription(tool.getDescription());
         result.setDepositPrice(tool.getDepositPrice());
         result.setRentalPrice(tool.getRentalPrice());
+        result.setImageUrls(new ArrayList<>(tool.getImageUrls()));
 
         final @NonNull User user = tool.getUser();
 
@@ -51,6 +56,13 @@ public class ToolMapper {
             result.setLookupStatus(new LookupDto(
                 tool.getStatus().getCode(),
                 tool.getStatus().getName()
+            ));
+        }
+
+        if (tool.getCategory() != null) {
+            result.setLookupCategory(new LookupDto(
+                tool.getCategory().getCode(),
+                tool.getCategory().getName()
             ));
         }
 
