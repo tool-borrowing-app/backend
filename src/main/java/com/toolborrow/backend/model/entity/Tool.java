@@ -1,14 +1,12 @@
 package com.toolborrow.backend.model.entity;
 
 import com.toolborrow.backend.model.entity.base.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,6 +29,18 @@ public class Tool extends BaseEntity {
     @JoinColumn(name = "lookup_id_status", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Lookup status;
+
+    @JoinColumn(name = "lookup_id_category", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Lookup category;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "tool_images",
+            joinColumns = @JoinColumn(name = "tool_id")
+    )
+    @Column(name = "image_url", nullable = false)
+    private List<String> imageUrls = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
