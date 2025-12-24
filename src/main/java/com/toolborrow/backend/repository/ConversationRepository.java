@@ -11,4 +11,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
 
     List<Conversation> findByToolIdAndRenterEmail(Long toolId, String renterEmail);
 
+    List<Conversation> findByRenterEmailOrToolUserEmail(String renterEmail, String toolUserEmail);
+
 }

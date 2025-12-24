@@ -20,23 +20,20 @@ public class ConversationController {
     private final ConversationService conversationService;
 
     @GetMapping
-    public ResponseEntity<String> getAllMyConversations() {
-
-        System.out.println("aaa");
-        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        return new ResponseEntity<>("heeleo", HttpStatus.OK);
+    public ResponseEntity<List<ConversationDto>> getAllMyConversations() {
+        List<ConversationDto> conversationDtoList = conversationService.getMyConversations();
+        return new ResponseEntity<>(conversationDtoList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getConversationById(final @PathVariable @NonNull Long id) {
-        return null;
+    public ResponseEntity<ConversationDto> getConversationById(final @PathVariable @NonNull Long id) {
+        ConversationDto conversationDto = conversationService.getById(id);
+        return new ResponseEntity<>(conversationDto, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<ConversationDto> startConversation(final @RequestBody @NonNull StartConversationDto startConversationDto) {
-
         ConversationDto conversationDto = conversationService.createConversation(startConversationDto);
-
         return new ResponseEntity<>(conversationDto, HttpStatus.CREATED);
     }
 

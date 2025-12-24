@@ -1,5 +1,6 @@
 package com.toolborrow.backend.service;
 
+import com.toolborrow.backend.mapping.ConversationMapper;
 import com.toolborrow.backend.model.dto.ConversationDto;
 import com.toolborrow.backend.model.dto.StartConversationDto;
 import com.toolborrow.backend.model.entity.Conversation;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,16 +27,22 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final ToolRepository toolRepository;
-
+    private final ConversationMapper conversationMapper;
 
     @Override
     public List<ConversationDto> getMyConversations() {
-        return null;
+        String loggedInUserMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return conversationRepository.findByRenterEmailOrToolUserEmail(loggedInUserMail, loggedInUserMail)
+                .stream().map(conversation -> conversationMapper.toDto(conversation)).collect(Collectors.toList());
     }
 
     @Override
     public ConversationDto getById(@NonNull Long id) {
-        return null;
+        Conversation conversation = conversationRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Conversation with id " + id + " was not found.")
+        );
+
+        return conversationMapper.toDto(conversation);
     }
 
     @Override
