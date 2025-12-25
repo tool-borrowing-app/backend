@@ -58,7 +58,7 @@ public class ToolServiceImpl implements ToolService {
     @Override
     @Transactional
     public @NonNull ToolDto create(final @NonNull CreateToolDto tool) {
-        final @NonNull Lookup status = resolveToolStatus("ACTIVE");
+        final @NonNull Lookup status = resolveToolStatus(tool.getLookupStatus().getCode());
         final @NonNull Lookup category = resolveToolCategory(tool.getLookupCategory().getCode());
         final User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
 
@@ -73,7 +73,6 @@ public class ToolServiceImpl implements ToolService {
         if (!imageUrls.isEmpty()) {
             entity.setImageUrls(imageUrls);
         }
-
 
         final @NonNull Tool saved = toolRepository.save(entity);
         return toolMapper.convert(saved);
