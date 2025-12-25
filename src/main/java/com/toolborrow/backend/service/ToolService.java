@@ -17,7 +17,7 @@ public interface ToolService {
 
     @NonNull ToolDto update(final @NonNull Long id, final @NonNull ToolDto tool);
 
-    void delete(final @NonNull Long id);
+    @NonNull void delete(final @NonNull Long id);
 
     @NonNull List<ReservationDto> getToolReservations(final @NonNull Long id);
 
