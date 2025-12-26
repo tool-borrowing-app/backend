@@ -17,14 +17,17 @@ import com.toolborrow.backend.repository.UserRepository;
 import com.toolborrow.backend.utils.JwtUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +61,7 @@ public class ToolServiceImpl implements ToolService {
     @Override
     @Transactional
     public @NonNull ToolDto create(final @NonNull CreateToolDto tool) {
-        final @NonNull Lookup status = resolveToolStatus("ACTIVE");
+        final @NonNull Lookup status = resolveToolStatus(tool.getLookupStatus().getCode());
         final @NonNull Lookup category = resolveToolCategory(tool.getLookupCategory().getCode());
         final User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
 
@@ -73,7 +76,6 @@ public class ToolServiceImpl implements ToolService {
         if (!imageUrls.isEmpty()) {
             entity.setImageUrls(imageUrls);
         }
-
 
         final @NonNull Tool saved = toolRepository.save(entity);
         return toolMapper.convert(saved);
@@ -127,7 +129,16 @@ public class ToolServiceImpl implements ToolService {
             throw new TBAException(BAD_REQUEST, "Tool has active reservations and cannot be deleted: " + id);
         }
 
-        toolRepository.deleteById(id);
+        Optional<Tool> tool = toolRepository.findById(id);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+
+        if (!Objects.equals(email, tool.get().getUser().getEmail())) {
+            throw new TBAException(BAD_REQUEST, "Only the owner of the tool can remove it!");
+        } else {
+            toolRepository.deleteById(id);
+        }
     }
 
     @Override
@@ -142,8 +153,6 @@ public class ToolServiceImpl implements ToolService {
 
         return reservationRepository.findByToolId(id).stream().map(reservationMapper::from).toList();
     }
-
-    // ===============================================================================
 
     private @NonNull Lookup resolveToolStatus(final @NonNull String statusCode) {
         final @NonNull String lookupTypeCode = LookupTypeCode.TOOL_STATUS.getCode();

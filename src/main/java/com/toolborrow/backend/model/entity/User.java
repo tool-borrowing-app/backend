@@ -3,7 +3,6 @@ package com.toolborrow.backend.model.entity;
 import com.toolborrow.backend.model.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -37,6 +36,9 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String streetAddress;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Tool> tools;
 
     @OneToMany(mappedBy = "renter")
     private List<Conversation> renterConversations;
