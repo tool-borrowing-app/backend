@@ -9,7 +9,7 @@ public class ConversationDto {
 
     private Long id;
 
-    private ToolDto toolDto;
+    private ToolDto tool;
 
     private UserProfileDto renter;
 

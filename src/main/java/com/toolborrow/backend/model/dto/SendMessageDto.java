@@ -6,6 +6,7 @@ import lombok.NonNull;
 @Data
 public class SendMessageDto {
 
+    private @NonNull Long conversationId;
     private @NonNull String text;
 
 }

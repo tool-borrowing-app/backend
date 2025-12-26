@@ -9,6 +9,7 @@ import com.toolborrow.backend.model.entity.User;
 import com.toolborrow.backend.repository.ConversationRepository;
 import com.toolborrow.backend.repository.ToolRepository;
 import com.toolborrow.backend.repository.UserRepository;
+import com.toolborrow.backend.utils.JwtUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,8 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public List<ConversationDto> getMyConversations() {
-        String loggedInUserMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //String loggedInUserMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedInUserMail = JwtUtils.getCurrentUserEmail();
         return conversationRepository.findByRenterEmailOrToolUserEmail(loggedInUserMail, loggedInUserMail)
                 .stream().map(conversation -> conversationMapper.toDto(conversation)).collect(Collectors.toList());
     }
@@ -72,6 +74,6 @@ public class ConversationServiceImpl implements ConversationService {
 
         Conversation savedConversation = conversationRepository.save(conversation);
 
-        return null;
+        return conversationMapper.toDto(savedConversation);
     }
 }
