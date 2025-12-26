@@ -14,6 +14,7 @@ import java.util.List;
 public class Conversation extends BaseEntity {
 
     @OneToMany(mappedBy = "conversation")
+    @OrderBy("sentAt ASC")
     private List<Message> messages;
 
     @ManyToOne

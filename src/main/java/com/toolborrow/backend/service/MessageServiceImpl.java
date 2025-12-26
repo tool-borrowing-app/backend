@@ -16,6 +16,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
@@ -44,6 +47,23 @@ public class MessageServiceImpl implements MessageService {
 
         Message savedMessage = messageRepository.save(message);
         return messageMapper.toDto(savedMessage);
+    }
+
+    @Override
+    public List<MessageDto> getMessages(Long conversationId) {
+
+        Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(
+                () -> new EntityNotFoundException("Conversation with id " + conversationId + " was not found.")
+        );
+
+        String loggedInUserMail = JwtUtils.getCurrentUserEmail();
+        if (!conversation.getRenter().getEmail().equals(loggedInUserMail) && !conversation.getTool().getUser().getEmail().equals(loggedInUserMail)) {
+            throw new AccessDeniedException("You don't have access to this conversation.");
+        }
+
+        List<Message> messages = conversation.getMessages();
+
+        return messages.stream().map(message -> messageMapper.toDto(message)).collect(Collectors.toList());
     }
 
 }

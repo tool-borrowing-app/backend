@@ -1,8 +1,10 @@
 package com.toolborrow.backend.controller;
 
 import com.toolborrow.backend.model.dto.ConversationDto;
+import com.toolborrow.backend.model.dto.MessageDto;
 import com.toolborrow.backend.model.dto.StartConversationDto;
 import com.toolborrow.backend.service.ConversationService;
+import com.toolborrow.backend.service.MessageService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.util.List;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final MessageService messageService;
 
     @GetMapping
     public ResponseEntity<List<ConversationDto>> getAllMyConversations() {
@@ -35,6 +38,12 @@ public class ConversationController {
     public ResponseEntity<ConversationDto> startConversation(final @RequestBody @NonNull StartConversationDto startConversationDto) {
         ConversationDto conversationDto = conversationService.createConversation(startConversationDto);
         return new ResponseEntity<>(conversationDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}/messages")
+    public ResponseEntity<List<MessageDto>> getMessages(final @PathVariable @NonNull Long id) {
+        List<MessageDto> messageDtoList = messageService.getMessages(id);
+        return new ResponseEntity<>(messageDtoList, HttpStatus.OK);
     }
 
 }
