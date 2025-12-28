@@ -1,5 +1,6 @@
 package com.toolborrow.backend.controller;
 
+import com.toolborrow.backend.model.dto.CreateReservationDto;
 import com.toolborrow.backend.model.dto.ReservationDto;
 import com.toolborrow.backend.service.ReservationService;
 import lombok.NonNull;
@@ -32,8 +33,8 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationDto> createReservation(final @RequestBody @NonNull ReservationDto reservationDto) {
-        return ResponseEntity.ok(reservationService.createReservation(reservationDto));
+    public ResponseEntity<ReservationDto> createReservation(final @RequestBody @NonNull CreateReservationDto createReservationDto) {
+        return ResponseEntity.ok(reservationService.createReservation(createReservationDto));
     }
 
     // =================================== REVIEW ===================================

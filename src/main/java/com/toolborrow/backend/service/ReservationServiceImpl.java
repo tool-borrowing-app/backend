@@ -2,11 +2,9 @@ package com.toolborrow.backend.service;
 
 import com.toolborrow.backend.exception.TBAException;
 import com.toolborrow.backend.mapping.ReservationMapper;
+import com.toolborrow.backend.model.dto.CreateReservationDto;
 import com.toolborrow.backend.model.dto.ReservationDto;
-import com.toolborrow.backend.model.entity.Lookup;
-import com.toolborrow.backend.model.entity.Reservation;
-import com.toolborrow.backend.model.entity.Tool;
-import com.toolborrow.backend.model.entity.User;
+import com.toolborrow.backend.model.entity.*;
 import com.toolborrow.backend.model.enums.LookupTypeCode;
 import com.toolborrow.backend.repository.LookupRepository;
 import com.toolborrow.backend.repository.ReservationRepository;
@@ -48,7 +46,7 @@ public class ReservationServiceImpl implements ReservationService {
     public @NonNull ReservationDto getById(final @NonNull Long id) {
         final @NonNull User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
         final @NonNull Reservation entity = reservationRepository.findById(id)
-            .orElseThrow(() -> new TBAException(NOT_FOUND, "Reservation not found with id: " + id));
+                .orElseThrow(() -> new TBAException(NOT_FOUND, "Reservation not found with id: " + id));
 
         if (!entity.getUserIdBorrow().equals(user)) {
             throw new TBAException(BAD_REQUEST, "Reservation don't belong to the same user! Reservation id: " + id);
@@ -58,15 +56,15 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Transactional
-    public @NonNull ReservationDto createReservation(final @NonNull ReservationDto reservation) {
+    public @NonNull ReservationDto createReservation(final @NonNull CreateReservationDto createReservationDto) {
         final @NonNull Lookup status = resolveReservationStatus("ACTIVE");
         final @NonNull User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
 
-        final @NonNull Tool tool = toolRepository.findById(reservation.getToolDto().getId())
-            .orElseThrow(() -> new TBAException(
-                NOT_FOUND, "Tool not found with id " + reservation.getToolDto().getId()));
+        final @NonNull Tool tool = toolRepository.findById(createReservationDto.getToolId())
+                .orElseThrow(() -> new TBAException(
+                        NOT_FOUND, "Tool not found with id " + createReservationDto.getToolId()));
 
-        if(user.equals(tool.getUser())) {
+        if (user.equals(tool.getUser())) {
             throw new TBAException(BAD_REQUEST, "User cannot reserve their own tool");
         }
 
@@ -74,12 +72,12 @@ public class ReservationServiceImpl implements ReservationService {
         final long existingReservations = reservationRepository.countActiveReservationsByUserAndTool(user.getId(), tool.getId());
         if (existingReservations >= maxReservationsPerUserPerTool) {
             throw new TBAException(BAD_REQUEST,
-                "User cannot have more than " + maxReservationsPerUserPerTool +
-                    " active reservations for this tool!");
+                    "User cannot have more than " + maxReservationsPerUserPerTool +
+                            " active reservations for this tool!");
         }
 
-        final @NonNull LocalDate from = reservation.getDateFrom();
-        final @NonNull LocalDate to = reservation.getDateTo();
+        final @NonNull LocalDate from = createReservationDto.getDateFrom();
+        final @NonNull LocalDate to = createReservationDto.getDateTo();
         final @NonNull LocalDate today = LocalDate.now();
 
         if (from.isBefore(today)) {
@@ -91,13 +89,27 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         final boolean overlapExists =
-            reservationRepository.existsOverlappingActiveReservation(tool.getId(), from, to);
+                reservationRepository.existsOverlappingActiveReservation(tool.getId(), from, to);
 
         if (overlapExists) {
             throw new TBAException(BAD_REQUEST, "Tool already reserved in the requested date range");
         }
 
-        final @NonNull Reservation entity = reservationMapper.from(reservation, user, tool, status);
+
+        final @NonNull User borrowerUser = userRepository.findById(createReservationDto.getBorrowerUserId())
+                .orElseThrow(() -> new TBAException(
+                        NOT_FOUND, "User not found with id: " + createReservationDto.getBorrowerUserId()));
+
+
+        final @NonNull Reservation entity =
+                reservationMapper.from(
+                        createReservationDto.getDateFrom(),
+                        createReservationDto.getDateTo(),
+                        borrowerUser,
+                        tool,
+                        status
+                );
+
         final @NonNull Reservation saved = reservationRepository.save(entity);
 
         return reservationMapper.from(saved);
@@ -108,7 +120,7 @@ public class ReservationServiceImpl implements ReservationService {
     public @NonNull ReservationDto submitReview(final @NonNull Long id, final @NonNull ReservationDto dto) {
 
         final @NonNull Reservation reservation = reservationRepository.findById(id)
-            .orElseThrow(() -> new TBAException(NOT_FOUND, "Reservation not found with id: " + id));
+                .orElseThrow(() -> new TBAException(NOT_FOUND, "Reservation not found with id: " + id));
 
         if (!reservation.getStatus().getCode().equals("FINISHED")) {
             throw new TBAException(BAD_REQUEST, "Reservation has not finished yet!");
@@ -163,10 +175,10 @@ public class ReservationServiceImpl implements ReservationService {
         final @NonNull String lookupTypeCode = LookupTypeCode.RESERVATION_STATUS.getCode();
 
         return lookupRepository
-            .findByCodeAndLookupTypeCode(statusCode, lookupTypeCode)
-            .orElseThrow(() -> new TBAException(
-                NOT_FOUND,
-                "Reservation status lookup not found: code=%s type=%s".formatted(statusCode, lookupTypeCode)
-            ));
+                .findByCodeAndLookupTypeCode(statusCode, lookupTypeCode)
+                .orElseThrow(() -> new TBAException(
+                        NOT_FOUND,
+                        "Reservation status lookup not found: code=%s type=%s".formatted(statusCode, lookupTypeCode)
+                ));
     }
 }
