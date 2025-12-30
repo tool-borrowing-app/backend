@@ -13,7 +13,7 @@ import java.util.List;
 @Table(name = "conversation")
 public class Conversation extends BaseEntity {
 
-    @OneToMany(mappedBy = "conversation")
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
     @OrderBy("sentAt ASC")
     private List<Message> messages;
 

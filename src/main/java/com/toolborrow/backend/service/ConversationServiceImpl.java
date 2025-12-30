@@ -31,11 +31,13 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationMapper conversationMapper;
 
     @Override
-    public List<ConversationDto> getMyConversations() {
-        //String loggedInUserMail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public List<ConversationDto> getMyConversations(Long itemId) {
         String loggedInUserMail = JwtUtils.getCurrentUserEmail();
-        return conversationRepository.findByRenterEmailOrToolUserEmail(loggedInUserMail, loggedInUserMail)
-                .stream().map(conversation -> conversationMapper.toDto(conversation)).collect(Collectors.toList());
+        List<Conversation> conversations = conversationRepository.findByRenterEmailOrToolUserEmail(loggedInUserMail, loggedInUserMail);
+        if (itemId != null) {
+            conversations.stream().filter(conversation -> conversation.getTool().getId().equals(itemId));
+        }
+        return conversations.stream().map(conversation -> conversationMapper.toDto(conversation)).collect(Collectors.toList());
     }
 
     @Override
@@ -75,5 +77,10 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation savedConversation = conversationRepository.save(conversation);
 
         return conversationMapper.toDto(savedConversation);
+    }
+
+    @Override
+    public void deleteConversation(Long id) {
+        conversationRepository.deleteById(id);
     }
 }

@@ -8,10 +8,12 @@ import java.util.List;
 
 public interface ConversationService {
 
-    List<ConversationDto> getMyConversations();
+    List<ConversationDto> getMyConversations(Long itemId);
 
     ConversationDto getById(final @NonNull Long id);
 
     ConversationDto createConversation(final @NonNull StartConversationDto startConversationPayload);
+
+    void deleteConversation(Long id);
 
 }

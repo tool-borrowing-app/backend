@@ -23,8 +23,8 @@ public class ConversationController {
     private final MessageService messageService;
 
     @GetMapping
-    public ResponseEntity<List<ConversationDto>> getAllMyConversations() {
-        List<ConversationDto> conversationDtoList = conversationService.getMyConversations();
+    public ResponseEntity<List<ConversationDto>> getAllMyConversations(@RequestParam(required = false) Long itemId) {
+        List<ConversationDto> conversationDtoList = conversationService.getMyConversations(itemId);
         return new ResponseEntity<>(conversationDtoList, HttpStatus.OK);
     }
 
@@ -38,6 +38,12 @@ public class ConversationController {
     public ResponseEntity<ConversationDto> startConversation(final @RequestBody @NonNull StartConversationDto startConversationDto) {
         ConversationDto conversationDto = conversationService.createConversation(startConversationDto);
         return new ResponseEntity<>(conversationDto, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteConversation(final @PathVariable @NonNull Long id) {
+        conversationService.deleteConversation(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{id}/messages")
