@@ -10,6 +10,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 @RequiredArgsConstructor
 public class ReservationMapper {
@@ -17,15 +19,16 @@ public class ReservationMapper {
     private final ToolMapper toolMapper;
 
     public @NonNull Reservation from(
-        final @NonNull ReservationDto dto,
+        final @NonNull LocalDate dateFrom,
+        final @NonNull LocalDate dateTo,
         final @NonNull User user,
         final @NonNull Tool tool,
         final @NonNull Lookup status
     ) {
         final @NonNull Reservation entity = new Reservation();
 
-        entity.setDateFrom(dto.getDateFrom());
-        entity.setDateTo(dto.getDateTo());
+        entity.setDateFrom(dateFrom);
+        entity.setDateTo(dateTo);
         entity.setTool(tool);
         entity.setUserIdBorrow(user);
         entity.setStatus(status);
