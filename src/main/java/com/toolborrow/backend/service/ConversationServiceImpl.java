@@ -35,7 +35,7 @@ public class ConversationServiceImpl implements ConversationService {
         String loggedInUserMail = JwtUtils.getCurrentUserEmail();
         List<Conversation> conversations = conversationRepository.findByRenterEmailOrToolUserEmail(loggedInUserMail, loggedInUserMail);
         if (itemId != null) {
-            conversations.stream().filter(conversation -> conversation.getTool().getId().equals(itemId));
+            conversations = conversations.stream().filter(conversation -> conversation.getTool().getId().equals(itemId)).collect(Collectors.toList());
         }
         return conversations.stream().map(conversation -> conversationMapper.toDto(conversation)).collect(Collectors.toList());
     }
