@@ -37,4 +37,10 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Tool> tools;
+
+    @OneToMany(mappedBy = "renter")
+    private List<Conversation> renterConversations;
+
+    @OneToMany(mappedBy = "sentBy")
+    private List<Message> messagesSent;
 }

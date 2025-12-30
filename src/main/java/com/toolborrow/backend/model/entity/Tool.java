@@ -1,5 +1,6 @@
 package com.toolborrow.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.toolborrow.backend.model.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -44,4 +45,9 @@ public class Tool extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
+
+    @OneToMany(mappedBy = "tool")
+    @JsonIgnore
+    private List<Conversation> conversations;
+
 }
