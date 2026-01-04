@@ -20,6 +20,7 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())   // <- IMPORTANT
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/payments/**").permitAll()
                 .anyRequest().authenticated()
             ).addFilterBefore(jwtCookieAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
