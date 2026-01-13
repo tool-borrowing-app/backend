@@ -7,12 +7,12 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.toolborrow.backend.exception.TBAException;
 import com.toolborrow.backend.model.dto.CreateCheckoutSessionDto;
+import com.toolborrow.backend.model.dto.CreateReservationDto;
+import com.toolborrow.backend.model.entity.Payment;
 import com.toolborrow.backend.model.entity.Tool;
 import com.toolborrow.backend.model.entity.User;
-import com.toolborrow.backend.repository.LookupRepository;
-import com.toolborrow.backend.repository.ReservationRepository;
-import com.toolborrow.backend.repository.ToolRepository;
-import com.toolborrow.backend.repository.UserRepository;
+import com.toolborrow.backend.model.entity.enums.PaymentStatus;
+import com.toolborrow.backend.repository.*;
 import com.toolborrow.backend.utils.JwtUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,9 @@ public class PaymentServiceImpl implements PaymentService {
     final public UserRepository userRepository;
     final public ToolRepository toolRepository;
     final public ReservationRepository reservationRepository;
-    final public LookupRepository lookupRepository;
+    final public PaymentRepository paymentRepository;
+
+    final public ReservationService reservationService;
 
     @Value("${reservation.max-per-user-per-tool}")
     private int maxReservationsPerUserPerTool;
@@ -48,17 +50,36 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${frontend.url}/kolcsonzes")
     private String cancelUrl;
 
-    public Session createCheckoutSession(CreateCheckoutSessionDto createCheckoutSessionDto) throws StripeException, TBAException {
+    public Session createCheckoutSession(CreateCheckoutSessionDto dto) throws StripeException {
         Stripe.apiKey = stripApikey;
+        verifyIfCheckoutSessionParametersIsValid(dto);
 
-        verifyIfCheckoutSessionParametersIsValid(createCheckoutSessionDto);
+        User borrower = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
+        Tool tool = toolRepository.findById(dto.getToolId())
+                .orElseThrow(() -> new TBAException(NOT_FOUND, "Tool not found with id " + dto.getToolId()));
 
-        long amountHuf = calculateAmountHuf(createCheckoutSessionDto) * 100;
+        Payment payment = Payment.builder()
+                .tool(tool)
+                .borrower(borrower)
+                .dateFrom(dto.getDateFrom())
+                .dateTo(dto.getDateTo())
+                .status(PaymentStatus.PENDING)
+                .build();
+
+        payment = paymentRepository.save(payment);
+
+        long amountHuf = calculateAmountHuf(dto) * 100L;
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
+                .setClientReferenceId(String.valueOf(payment.getId()))
+                .putMetadata("paymentId", String.valueOf(payment.getId()))
+                .putMetadata("toolId", String.valueOf(dto.getToolId()))
+                .putMetadata("borrowerUserId", String.valueOf(borrower.getId()))
+                .putMetadata("dateFrom", dto.getDateFrom().toString())
+                .putMetadata("dateTo", dto.getDateTo().toString())
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
                                 .setQuantity(1L)
@@ -68,7 +89,7 @@ public class PaymentServiceImpl implements PaymentService {
                                                 .setUnitAmount(amountHuf)
                                                 .setProductData(
                                                         SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                                .setName("Tool Reservation Test")
+                                                                .setName("Tool Reservation")
                                                                 .build()
                                                 )
                                                 .build()
@@ -77,40 +98,61 @@ public class PaymentServiceImpl implements PaymentService {
                 )
                 .build();
 
-        return Session.create(params);
+        Session session = Session.create(params);
+
+        payment.setCheckoutSessionId(session.getId());
+        paymentRepository.save(payment);
+
+        return session;
     }
 
+
     public String stripeWebhook(Event event) {
-
-        EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
-
-        StripeObject stripeObject = null;
-        if (dataObjectDeserializer.getObject().isPresent()) {
-            stripeObject = dataObjectDeserializer.getObject().get();
-        } else {
-            // Deserialization failed, probably due to an API version mismatch.
-            // Refer to the Javadoc documentation on `EventDataObjectDeserializer` for
-            // instructions on how to handle this case, or return an error here.
+        EventDataObjectDeserializer deser = event.getDataObjectDeserializer();
+        StripeObject stripeObject = deser.getObject().orElse(null);
+        if (stripeObject == null) {
+            System.out.println("Deserialization failed");
+            return "";
         }
 
         switch (event.getType()) {
-            case "checkout.session.completed":
-                System.out.println("event: checkout.session.completed");
-                break;
-            case "payment_intent.succeeded":
-                PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
-                System.out.println("Payment for " + paymentIntent.getAmount() + " succeeded.");
-                // Then define and call a method to handle the successful payment intent.
-                // handlePaymentIntentSucceeded(paymentIntent);
-                break;
-            case "payment_method.attached":
-                PaymentMethod paymentMethod = (PaymentMethod) stripeObject;
-                // Then define and call a method to handle the successful attachment of a PaymentMethod.
-                // handlePaymentMethodAttached(paymentMethod);
-                break;
-            default:
-                System.out.println("Unhandled event type: " + event.getType());
-                break;
+            case "checkout.session.completed" -> {
+                Session session = (Session) stripeObject;
+
+                String paymentIdStr = session.getClientReferenceId();
+                if (paymentIdStr == null) {
+                    paymentIdStr = session.getMetadata().get("paymentId");
+                }
+                if (paymentIdStr == null) {
+                    System.out.println("Missing paymentId/clientReferenceId on session " + session.getId());
+                    return "";
+                }
+
+                long paymentId = Long.parseLong(paymentIdStr);
+
+                Payment payment = paymentRepository.findById(paymentId)
+                        .orElseThrow(() -> new TBAException(NOT_FOUND, "Payment not found: " + paymentId));
+
+                // idempotency
+                if (payment.getStatus() == PaymentStatus.FINISHED) return "";
+
+                payment.setPaymentIntentId(session.getPaymentIntent());
+                payment.setStatus(PaymentStatus.FINISHED);
+                paymentRepository.save(payment);
+
+                // create reservation from metadata
+                var metadata = session.getMetadata();
+
+                CreateReservationDto createReservationDto = CreateReservationDto.builder()
+                        .toolId(Long.parseLong(metadata.get("toolId")))
+                        .borrowerUserId(Long.parseLong(metadata.get("borrowerUserId")))
+                        .dateFrom(LocalDate.parse(metadata.get("dateFrom")))
+                        .dateTo(LocalDate.parse(metadata.get("dateTo")))
+                        .build();
+
+                reservationService.createReservation(createReservationDto);
+            }
+            default -> System.out.println("Unhandled event type: " + event.getType());
         }
         return "";
     }
