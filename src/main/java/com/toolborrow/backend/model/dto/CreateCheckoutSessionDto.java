@@ -1,14 +1,12 @@
 package com.toolborrow.backend.model.dto;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class CreateReservationDto {
+public class CreateCheckoutSessionDto {
     private @NonNull Long toolId;
     private @NonNull LocalDate dateFrom;
     private @NonNull LocalDate dateTo;
