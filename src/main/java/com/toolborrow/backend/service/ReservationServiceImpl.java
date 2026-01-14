@@ -58,18 +58,22 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional
     public @NonNull ReservationDto createReservation(final @NonNull CreateReservationDto createReservationDto) {
         final @NonNull Lookup status = resolveReservationStatus("ACTIVE");
-        final @NonNull User user = userRepository.findByEmail(JwtUtils.getCurrentUserEmail());
+
+        final @NonNull User borrower = userRepository.findById(createReservationDto.getBorrowerUserId())
+                .orElseThrow(() -> new TBAException(
+                        NOT_FOUND, "No borrower found with user id" + createReservationDto.getBorrowerUserId()
+                ));
 
         final @NonNull Tool tool = toolRepository.findById(createReservationDto.getToolId())
                 .orElseThrow(() -> new TBAException(
                         NOT_FOUND, "Tool not found with id " + createReservationDto.getToolId()));
 
-        if (user.equals(tool.getUser())) {
+        if (borrower.equals(tool.getUser())) {
             throw new TBAException(BAD_REQUEST, "User cannot reserve their own tool");
         }
 
         // ---- limit ellenőrzés ----
-        final long existingReservations = reservationRepository.countActiveReservationsByUserAndTool(user.getId(), tool.getId());
+        final long existingReservations = reservationRepository.countActiveReservationsByUserAndTool(borrower.getId(), tool.getId());
         if (existingReservations >= maxReservationsPerUserPerTool) {
             throw new TBAException(BAD_REQUEST,
                     "User cannot have more than " + maxReservationsPerUserPerTool +
