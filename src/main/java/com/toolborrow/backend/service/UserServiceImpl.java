@@ -37,16 +37,6 @@ public class UserServiceImpl implements UserService {
         final List<Reservation> ownerReservations = reservationRepository.findByTool_User_Id(id);
 
         final List<ReviewDataDto> asOwner = ownerReservations.stream()
-            .filter(r -> r.getBorrowerScore() != null)
-            .map(r -> ReviewDataDto.builder()
-                .score(r.getBorrowerScore())
-                .comment(r.getBorrowerComment())
-                .build())
-            .toList();
-
-        final List<Reservation> borrowerReservations = reservationRepository.findByUserIdBorrow_Id(id);
-
-        final List<ReviewDataDto> asBorrower = borrowerReservations.stream()
             .filter(r -> r.getOwnerScore() != null)
             .map(r -> ReviewDataDto.builder()
                 .score(r.getOwnerScore())
@@ -54,8 +44,18 @@ public class UserServiceImpl implements UserService {
                 .build())
             .toList();
 
+        final List<Reservation> borrowerReservations = reservationRepository.findByUserIdBorrow_Id(id);
+
+        final List<ReviewDataDto> asBorrower = borrowerReservations.stream()
+            .filter(r -> r.getBorrowerScore() != null)
+            .map(r -> ReviewDataDto.builder()
+                .score(r.getBorrowerScore())
+                .comment(r.getBorrowerComment())
+                .build())
+            .toList();
+
         final double average = Stream.concat(asOwner.stream(), asBorrower.stream())
-            .mapToLong(d -> d.getScore().longValue())
+            .mapToDouble(d -> d.getScore().doubleValue())
             .average()
             .orElse(0.0);
 
