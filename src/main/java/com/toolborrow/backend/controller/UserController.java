@@ -1,5 +1,6 @@
 package com.toolborrow.backend.controller;
 
+import com.toolborrow.backend.model.dto.ReviewStatisticsDto;
 import com.toolborrow.backend.model.entity.Tool;
 import com.toolborrow.backend.service.UserService;
 import lombok.NonNull;
@@ -24,5 +25,10 @@ public class UserController {
     @GetMapping("/{id}/tools")
     public @NonNull ResponseEntity<List<Tool>> getToolsForUser(final @PathVariable @NonNull Long id) {
         return ResponseEntity.ok(service.getToolsForUser(id));
+    }
+
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<ReviewStatisticsDto> getReviewsForUser(final @PathVariable @NonNull Long id) {
+        return ResponseEntity.ok(service.getReviewStatistics(id));
     }
 }
