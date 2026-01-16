@@ -2,6 +2,7 @@ package com.toolborrow.backend.mapping;
 
 import com.toolborrow.backend.model.dto.LookupDto;
 import com.toolborrow.backend.model.dto.ReservationDto;
+import com.toolborrow.backend.model.dto.UserProfileDto;
 import com.toolborrow.backend.model.entity.Lookup;
 import com.toolborrow.backend.model.entity.Reservation;
 import com.toolborrow.backend.model.entity.Tool;
@@ -55,6 +56,15 @@ public class ReservationMapper {
         dto.setBorrowerScore(entity.getBorrowerScore());
         dto.setOwnerComment(entity.getOwnerComment());
         dto.setOwnerScore(entity.getOwnerScore());
+
+        if (entity.getUserIdBorrow() != null) {
+            dto.setBorrower(new UserProfileDto(
+                entity.getUserIdBorrow().getId(),
+                entity.getUserIdBorrow().getFirstName(),
+                entity.getUserIdBorrow().getLastName(),
+                entity.getUserIdBorrow().getEmail()
+            ));
+        }
 
         return dto;
     }

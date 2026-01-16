@@ -14,6 +14,10 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long > {
     List<Reservation> findByUserIdBorrow(User userIdBorrow);
 
+    List<Reservation> findByTool_User_Id(Long ownerId);
+
+    List<Reservation> findByUserIdBorrow_Id(Long borrowerId);
+
     @Query("""
         SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
         FROM Reservation r
