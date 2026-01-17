@@ -12,11 +12,12 @@ public class NotificationMapper {
         if (notification == null) return null;
 
         return new NotificationDto(
-            notification.getCreatedAt(),
-            notification.getMessage(),
-            notification.getReference(),
-            notification.getAcknowledged(),
-            notification.getType()
+                notification.getId(),
+                notification.getCreatedAt(),
+                notification.getMessage(),
+                notification.getReference(),
+                notification.getAcknowledged(),
+                notification.getType()
         );
     }
 

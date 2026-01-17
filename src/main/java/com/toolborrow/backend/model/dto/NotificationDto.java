@@ -12,6 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class NotificationDto {
 
+    private Long id;
     private Date createdAt;
     private String message;
     private String reference;
