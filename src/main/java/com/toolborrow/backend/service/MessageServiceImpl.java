@@ -6,6 +6,7 @@ import com.toolborrow.backend.model.dto.MessageDto;
 import com.toolborrow.backend.model.dto.SendMessageDto;
 import com.toolborrow.backend.model.entity.Conversation;
 import com.toolborrow.backend.model.entity.Message;
+import com.toolborrow.backend.model.entity.User;
 import com.toolborrow.backend.repository.ConversationRepository;
 import com.toolborrow.backend.repository.MessageRepository;
 import com.toolborrow.backend.repository.UserRepository;
@@ -27,6 +28,7 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final MessageMapper messageMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -46,6 +48,15 @@ public class MessageServiceImpl implements MessageService {
         message.setSeenByReceiver(false);
 
         Message savedMessage = messageRepository.save(message);
+
+        User receiver;
+        if (conversation.getRenter().getEmail().equals(loggedInUserMail)) {
+            receiver = conversation.getTool().getUser();
+        } else {
+            receiver = conversation.getRenter();
+        }
+        notificationService.createMessageNotification(conversation.getId(), receiver.getEmail(), loggedInUserMail);
+
         return messageMapper.toDto(savedMessage);
     }
 
