@@ -24,7 +24,7 @@ public class NotificationController {
         return new ResponseEntity<>(notificationDtoList, HttpStatus.OK);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/acknowledge/{id}")
     public ResponseEntity<NotificationDto> acknowledge(
             @PathVariable(name = "id") Long id
     ) {
