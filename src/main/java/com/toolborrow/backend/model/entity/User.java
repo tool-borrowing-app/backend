@@ -43,4 +43,7 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "sentBy")
     private List<Message> messagesSent;
+
+    @OneToMany(mappedBy = "user")
+    private List<Notification> notifications;
 }
