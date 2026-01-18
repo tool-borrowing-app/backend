@@ -24,6 +24,7 @@ public class CorsConfig {
 
         allowedOrigins.add("http://localhost:3000");
         allowedOrigins.add("https://tool-borrowing-app.vercel.app");
+        allowedOrigins.add("https://tool-borrowing-app.up.railway.app");
 
         if (frontendUrl != null && !frontendUrl.isEmpty()) {
             allowedOrigins.add(frontendUrl);
