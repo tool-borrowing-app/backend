@@ -23,6 +23,7 @@ public class CorsConfig {
         List<String> allowedOrigins = new ArrayList<>();
 
         allowedOrigins.add("http://localhost:3000");
+        allowedOrigins.add("https://tool-borrowing-app.vercel.app");
 
         if (frontendUrl != null && !frontendUrl.isEmpty()) {
             allowedOrigins.add(frontendUrl);
