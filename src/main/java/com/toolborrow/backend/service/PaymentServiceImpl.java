@@ -47,7 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${frontend.url}/success")
     private String successUrl;
 
-    @Value("${frontend.url}/kolcsonzes")
+    @Value("${frontend.url}")
     private String cancelUrl;
 
     public Session createCheckoutSession(CreateCheckoutSessionDto dto) throws StripeException {
