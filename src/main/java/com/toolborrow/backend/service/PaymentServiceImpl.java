@@ -44,7 +44,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${stripe.api-key}")
     private String stripApikey;
 
-    @Value("${frontend.url}/success")
+    @Value("${frontend.url}/kolcsonzeseim")
     private String successUrl;
 
     @Value("${frontend.url}")
