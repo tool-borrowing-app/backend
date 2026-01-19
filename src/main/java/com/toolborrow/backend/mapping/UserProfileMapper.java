@@ -1,5 +1,6 @@
 package com.toolborrow.backend.mapping;
 
+import com.toolborrow.backend.model.dto.UserFullProfileDto;
 import com.toolborrow.backend.model.dto.UserProfileDto;
 import com.toolborrow.backend.model.entity.User;
 import lombok.NonNull;
@@ -21,4 +22,16 @@ public class UserProfileMapper {
         );
     }
 
+    public @NonNull UserFullProfileDto toFullDto(final @NonNull User entity) {
+        return UserFullProfileDto.builder()
+            .id(entity.getId())
+            .firstName(entity.getFirstName())
+            .lastName(entity.getLastName())
+            .email(entity.getEmail())
+            .phoneNumber(entity.getPhoneNumber())
+            .postalCode(entity.getPostalCode())
+            .city(entity.getCity())
+            .streetAddress(entity.getStreetAddress())
+            .build();
+    }
 }

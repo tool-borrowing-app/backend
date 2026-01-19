@@ -20,5 +20,5 @@ public class ReservationDto {
     private String ownerComment;
     private Long borrowerScore;
     private String borrowerComment;
-    private UserProfileDto borrower;
+    private UserFullProfileDto borrower;
 }
