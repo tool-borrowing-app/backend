@@ -51,6 +51,8 @@ public class PaymentServiceImpl implements PaymentService {
     private String cancelUrl;
 
     public Session createCheckoutSession(CreateCheckoutSessionDto dto) throws StripeException {
+        System.out.println("Creating checkout session for payment");
+
         Stripe.apiKey = stripApikey;
         verifyIfCheckoutSessionParametersIsValid(dto);
 
@@ -114,6 +116,8 @@ public class PaymentServiceImpl implements PaymentService {
             System.out.println("Deserialization failed");
             return "";
         }
+
+        System.out.println("Stripe webhook invoked using event: " + event.getType());
 
         switch (event.getType()) {
             case "checkout.session.completed" -> {
